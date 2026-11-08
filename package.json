@@ -1,0 +1,32 @@
+{
+  "name": "doccare-doctor-appointment-system",
+  "version": "1.0.0",
+  "description": "Full-Stack MERN Doctor Appointment, Online Payment & Prescription Management System",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node backend/server.js",
+    "backend": "npm start --prefix backend",
+    "backend:dev": "npm run dev --prefix backend",
+    "frontend": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "lint": "npm run lint --prefix frontend",
+    "seed:admin": "npm run seed:admin --prefix backend",
+    "seed:doctors": "npm run seed:doctors --prefix backend",
+    "test:all": "node backend/src/utils/verifyPhase9FullSystem.js",
+    "test:p6": "node backend/src/utils/testPhase6.js",
+    "test:p7": "node backend/src/utils/testPhase7.js",
+    "test:p8": "node backend/src/utils/testPhase8.js"
+  },
+  "keywords": [
+    "doctor-appointment",
+    "mern",
+    "telehealth",
+    "razorpay",
+    "digital-prescription",
+    "healthcare"
+  ],
+  "author": "DocCare Healthcare System",
+  "license": "ISC"
+}
+
