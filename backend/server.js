@@ -1,3 +1,4 @@
+
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -12,7 +13,7 @@ import appointmentRoutes from './src/routes/appointmentRoutes.js';
 import paymentRoutes from './src/routes/paymentRoutes.js';
 import prescriptionRoutes from './src/routes/prescriptionRoutes.js';
 
-// Load env vars
+// Load environment variables
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -32,6 +33,7 @@ app.use(
     cors({
         origin: (origin, callback) => {
             if (!origin) return callback(null, true);
+
             if (
                 process.env.NODE_ENV !== 'production' ||
                 allowedOrigins.length === 0 ||
@@ -41,16 +43,22 @@ app.use(
             ) {
                 return callback(null, true);
             }
+
             return callback(null, true);
         },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+        allowedHeaders: [
+            'Content-Type',
+            'Authorization',
+            'X-Requested-With'
+        ]
     })
 );
+
 app.use(express.json());
 
-// Routes
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/doctors', doctorRoutes);
@@ -59,42 +67,58 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 
-// Basic health check route
+// Health Check
 app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'success', message: 'API is running successfully' });
+    res.status(200).json({
+        status: 'success',
+        message: 'API is running successfully'
+    });
 });
 
 // Serve frontend build in production
 if (process.env.NODE_ENV === 'production') {
     const frontendDist = path.join(__dirname, '../frontend/dist');
+
     app.use(express.static(frontendDist));
 
-    app.get('*', (req, res, next) => {
+    // Express 5 compatible wildcard route
+    app.get('/{*splat}', (req, res, next) => {
         if (req.path.startsWith('/api')) {
             return next();
         }
+
         res.sendFile(path.join(frontendDist, 'index.html'));
     });
 }
 
 // 404 handler for unmatched API routes
 app.use('/api', (req, res) => {
-    res.status(404).json({ success: false, message: `API endpoint ${req.originalUrl} not found.` });
-});
-
-// Global application error handling middleware
-app.use((err, req, res, next) => {
-    console.error('Unhandled Application Error:', err);
-    const statusCode = err.statusCode || 500;
-    res.status(statusCode).json({
+    res.status(404).json({
         success: false,
-        message: err.message || 'Internal Server Error',
-        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+        message: `API endpoint ${req.originalUrl} not found.`
     });
 });
 
+// Global error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Unhandled Application Error:', err);
+
+    const statusCode = err.statusCode || 500;
+
+    res.status(statusCode).json({
+        success: false,
+        message: err.message || 'Internal Server Error',
+        ...(process.env.NODE_ENV === 'development' && {
+            stack: err.stack
+        })
+    });
+});
+
+// Start Server
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    console.log(
+        `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
+    );
 });
