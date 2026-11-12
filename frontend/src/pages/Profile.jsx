@@ -600,8 +600,8 @@ const Profile = () => {
                                     </label>
                                     <div className="flex flex-wrap gap-2">
                                         {allDays.map((day) => {
-                                            const isSelected = availabilityData.workingDays.includes(day);
-                                            return (
+                                            const isSelected = (availabilityData?.workingDays ?? []).includes(day)
+                                            return (   
                                                 <button
                                                     key={day}
                                                     type="button"
