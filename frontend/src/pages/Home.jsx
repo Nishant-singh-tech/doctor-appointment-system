@@ -92,7 +92,7 @@ const Home = () => {
             {/* System Health Status Card */}
             <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${healthStatus.includes('offline') ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`} />
+                    <div className={`w-3 h-3 rounded-full ${String(healthStatus ?? '').includes('offline') ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`} />
                     <div>
                         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Backend Status</span>
                         <span className="text-sm font-medium text-gray-900">{healthStatus}</span>
