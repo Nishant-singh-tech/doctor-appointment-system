@@ -5,15 +5,16 @@ import User from '../models/User.js';
  * @route   GET /api/doctors
  * @access  Public
  */
+
+
 export const getDoctors = async (req, res) => {
     try {
         const { search, specialization, location, page = 1, limit = 6 } = req.query;
 
-        // Base query: ONLY verified and unblocked doctors
+        // Show all registered doctors except blocked doctors
         const query = {
             role: 'doctor',
-            isVerified: true,
-            isBlocked: false
+            isBlocked: { $ne: true }
         };
 
         // Search by doctor name
@@ -36,6 +37,7 @@ export const getDoctors = async (req, res) => {
         const skip = (pageNum - 1) * pageSize;
 
         const totalDoctors = await User.countDocuments(query);
+
         const doctors = await User.find(query)
             .select('-password')
             .sort({ experience: -1, createdAt: -1 })
@@ -50,8 +52,10 @@ export const getDoctors = async (req, res) => {
             pages: Math.ceil(totalDoctors / pageSize) || 1,
             doctors
         });
+
     } catch (error) {
         console.error('Error in getDoctors:', error.message);
+
         return res.status(500).json({
             success: false,
             message: 'Server error retrieving doctors.',
@@ -59,6 +63,8 @@ export const getDoctors = async (req, res) => {
         });
     }
 };
+
+
 
 /**
  * @desc    Get detailed public profile of a single doctor
