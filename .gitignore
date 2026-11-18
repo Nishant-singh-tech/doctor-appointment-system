@@ -28,3 +28,5 @@ Thumbs.db
 
 .env.production
 .env.development
+
+DEMO_DOCTORS_CREDENTIALS.md

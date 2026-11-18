@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
 import { connectDB } from './src/config/db.js';
 import authRoutes from './src/routes/authRoutes.js';
 import patientRoutes from './src/routes/patientRoutes.js';
@@ -13,14 +14,12 @@ import appointmentRoutes from './src/routes/appointmentRoutes.js';
 import paymentRoutes from './src/routes/paymentRoutes.js';
 import prescriptionRoutes from './src/routes/prescriptionRoutes.js';
 
-// Load environment variables
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Connect to database
-connectDB();
+// Load environment variables (supports root and backend directory execution)
+dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
@@ -32,7 +31,9 @@ const allowedOrigins = process.env.CLIENT_URL
 app.use(
     cors({
         origin: (origin, callback) => {
-            if (!origin) return callback(null, true);
+            if (!origin) {
+                return callback(null, true);
+            }
 
             if (
                 process.env.NODE_ENV !== 'production' ||
@@ -44,7 +45,7 @@ app.use(
                 return callback(null, true);
             }
 
-            return callback(null, true);
+            return callback(new Error('Not allowed by CORS'));
         },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -75,22 +76,6 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Serve frontend build in production
-if (process.env.NODE_ENV === 'production') {
-    const frontendDist = path.join(__dirname, '../frontend/dist');
-
-    app.use(express.static(frontendDist));
-
-    // Express 5 compatible wildcard route
-    app.get('/{*splat}', (req, res, next) => {
-        if (req.path.startsWith('/api')) {
-            return next();
-        }
-
-        res.sendFile(path.join(frontendDist, 'index.html'));
-    });
-}
-
 // 404 handler for unmatched API routes
 app.use('/api', (req, res) => {
     res.status(404).json({
@@ -117,8 +102,19 @@ app.use((err, req, res, next) => {
 // Start Server
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(
-        `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
-    );
-});
+const startServer = async () => {
+    try {
+        await connectDB();
+
+        app.listen(PORT, () => {
+            console.log(
+                `Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`
+            );
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+};
+
+startServer();

@@ -11,9 +11,10 @@ export const getDoctors = async (req, res) => {
     try {
         const { search, specialization, location, page = 1, limit = 6 } = req.query;
 
-        // Show all registered doctors except blocked doctors
+        // Base query: ONLY verified and unblocked doctors
         const query = {
             role: 'doctor',
+            isVerified: true,
             isBlocked: { $ne: true }
         };
 
